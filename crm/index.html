@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>CRM de Pacientes – IMO</title>
+<style>
+:root{--bg:#F4F6F3;--surface:#fff;--ink:#16241C;--muted:#5B6B62;--line:#D3DDD6;--accent:#2F6B4F;--accent-soft:#E3EEE7;--wa:#1F8A4C;--warn:#A15C07;--warn-soft:#FBEFD9;--bad:#A3322A;--bad-soft:#F8E1DF;--ok-soft:#DFF1E6}
+@media (prefers-color-scheme: dark){:root{--bg:#0F1713;--surface:#17221C;--ink:#E3ECE6;--muted:#9AAEA2;--line:#2A3A31;--accent:#7CC39E;--accent-soft:#1E3328;--wa:#3DBF74;--warn:#E8B055;--warn-soft:#3A2E17;--bad:#EE8A80;--bad-soft:#3B2120;--ok-soft:#1B3325}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,"Segoe UI",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line);padding:12px 16px}
+.top{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+h1{font-size:18px;margin:0}
+.sub{color:var(--muted);font-size:13px}
+.filters{display:grid;grid-template-columns:2fr repeat(5,1fr);gap:8px;margin-top:10px}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+button{cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-wa{background:var(--wa);border-color:var(--wa);color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px}
+.btn-mail{text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 12px;display:inline-block}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:13px;cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+main{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:16px;padding:16px;max-width:1500px;margin:0 auto}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--muted)}
+.stat b{display:block;font-size:20px;color:var(--ink)}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);cursor:pointer;white-space:nowrap;background:var(--bg)}
+tr.row{cursor:pointer}
+tr.row:hover{background:var(--accent-soft)}
+tr.sel{background:var(--accent-soft)}
+.tag{display:inline-block;font-size:12px;border-radius:6px;padding:1px 7px;margin:1px 2px 1px 0;background:var(--bg);border:1px solid var(--line)}
+.st-novo{background:var(--bg)} .st-contatado{background:var(--warn-soft)} .st-respondeu{background:var(--accent-soft)} .st-agendou{background:var(--ok-soft)} .st-nao{background:var(--bad-soft)}
+.muted{color:var(--muted)}
+aside{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;position:sticky;top:150px;align-self:start;max-height:calc(100vh - 170px);overflow:auto}
+aside h2{margin:0 0 4px;font-size:18px}
+.grid2{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px;margin:10px 0}
+.grid2 span:nth-child(odd){color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.hist{font-size:13px;border-top:1px solid var(--line);margin-top:12px;padding-top:8px}
+.hist div{padding:3px 0;border-bottom:1px dashed var(--line)}
+label.small{font-size:12px;color:var(--muted);display:block;margin-top:10px}
+.pager{display:flex;gap:8px;align-items:center;margin:10px 0;color:var(--muted);font-size:13px}
+.warnbox{background:var(--bad-soft);border-radius:8px;padding:8px 10px;font-size:13px;margin:8px 0}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow:auto}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:14px;max-width:820px;width:100%;padding:20px;border:1px solid var(--line)}
+.modal h2{margin:0 0 6px;font-size:20px}
+.tpl{border:1px solid var(--line);border-radius:10px;padding:12px;margin:12px 0;background:var(--bg)}
+.tpl .row2{display:flex;gap:8px;align-items:center}
+.prev{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:14px;white-space:pre-wrap}
+.hint{font-size:13px;color:var(--muted)}
+code{background:var(--accent-soft);padding:0 4px;border-radius:4px}
+.loader{max-width:620px;margin:60px auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px}
+.loader h1{font-size:22px;margin-bottom:8px}
+@media (max-width:1000px){main{grid-template-columns:1fr}aside{position:static;max-height:none}.filters{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div><h1>CRM de Pacientes – Instituto de Medicina Orgânica</h1>
+    <div class="sub" id="sub"></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button id="btnMsgs" class="primary">Mensagens prontas</button>
+      <label class="chip" style="margin:0;padding:7px 12px;border-radius:8px">Atualizar pacientes<input type="file" id="fileData" accept=".html,.json" hidden></label>
+      <button id="btnCsv">Exportar lista (CSV)</button>
+      <button id="btnBackup">Backup do follow-up</button>
+      <label class="chip" style="margin:0">Restaurar backup<input type="file" id="fileRestore" accept=".json" hidden></label>
+    </div>
+  </div>
+  <div class="filters">
+    <input id="q" placeholder="Buscar por nome, telefone, e-mail ou cidade…">
+    <select id="fCidade"><option value="">Todas as cidades</option></select>
+    <select id="fProc"><option value="">Todos os procedimentos</option></select>
+    <select id="fModal"><option value="">Online e presencial</option><option value="Online">Teve consulta online</option><option value="Presencial">Teve consulta presencial</option></select>
+    <select id="fSem"><option value="">Qualquer última consulta</option><option value="3">Sem consulta há 3+ meses</option><option value="6">Sem consulta há 6+ meses</option><option value="12">Sem consulta há 1+ ano</option><option value="24">Sem consulta há 2+ anos</option><option value="nunca">Nunca consultou (só cadastro)</option></select>
+    <select id="fStatus"><option value="">Todos os status de follow-up</option><option>Novo</option><option>Contatado</option><option>Respondeu</option><option>Agendou</option><option>Não quer contato</option><option value="__prox">Próximo contato vencido</option></select>
+  </div>
+  <div class="chips" id="quick"></div>
+</header>
+<main>
+  <section>
+    <div class="stats" id="stats"></div>
+    <table><thead><tr>
+      <th data-k="nome">Paciente</th><th data-k="idade">Idade</th><th data-k="cidade">Cidade</th><th data-k="ultTs">Última consulta</th><th data-k="nFin">Consultas</th><th>Procedimentos</th><th data-k="fu">Follow-up</th>
+    </tr></thead><tbody id="tb"></tbody></table>
+    <div class="pager"><button id="prev">‹ Anterior</button><span id="pinfo"></span><button id="next">Próxima ›</button></div>
+  </section>
+  <aside id="det"><p class="muted">Clique em um paciente para ver os detalhes, o histórico de atendimentos e enviar mensagem.</p></aside>
+</main>
+<div id="loader" class="loader" style="display:none">
+  <h1>CRM de Pacientes – IMO</h1>
+  <p>Para começar, escolha o arquivo de pacientes que está no seu computador (por exemplo <b>CRM-Pacientes-IMO-v2.html</b>, na pasta Downloads).</p>
+  <p class="hint">Os dados são lidos direto do seu computador e ficam guardados só neste navegador. Nada é enviado para a internet nem para o GitHub.</p>
+  <label class="btn-wa" style="cursor:pointer">Escolher arquivo de pacientes<input type="file" id="fileData0" accept=".html,.json" hidden></label>
+  <p class="hint" id="loadMsg"></p>
+</div>
+<div class="overlay" id="ovMsgs"><div class="modal">
+  <div class="top"><h2>Mensagens prontas</h2><button id="closeMsgs">Fechar</button></div>
+  <p class="hint">Edite à vontade: tudo fica salvo automaticamente neste navegador. Use <code>{nome}</code> para o primeiro nome do paciente, <code>{ultima}</code> para a data da última consulta e <code>{consultas}</code> para o número de consultas. Para <b>negrito</b> no WhatsApp, coloque o texto entre asteriscos: <code>*assim*</code>.</p>
+  <div id="tplList"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="addTpl" class="primary">+ Nova mensagem</button><button id="resetTpl">Restaurar mensagens padrão</button></div>
+</div></div>
+<script>
+const DATA_KEY='crm_imo_dados_v1', MSG_KEY='crm_imo_mensagens_v1';
+let RAW=null; try{RAW=JSON.parse(localStorage.getItem(DATA_KEY)||'null')}catch(e){}
+function parseDataFile(t){
+  t=t.trim();
+  if(t.startsWith('{')) return JSON.parse(t);
+  const i=t.indexOf('const RAW = '); if(i<0) throw new Error('arquivo sem dados');
+  const j=t.indexOf('\nconst MSGS',i); const k=t.lastIndexOf(';',j);
+  return JSON.parse(t.slice(i+12,k));
+}
+function loadData(file,msgEl){
+  file.text().then(t=>{const d=parseDataFile(t); if(!d||!d.pac||!d.ag) throw new Error('formato'); localStorage.setItem(DATA_KEY,JSON.stringify(d)); location.reload()})
+  .catch(err=>{const m='Não consegui ler esse arquivo ('+err.message+'). Escolha o arquivo CRM-Pacientes-IMO-v2.html.'; if(msgEl) msgEl.textContent=m; else alert(m)});
+}
+document.getElementById('fileData0').onchange=e=>e.target.files[0]&&loadData(e.target.files[0],document.getElementById('loadMsg'));
+document.getElementById('fileData').onchange=e=>e.target.files[0]&&confirm('Substituir a lista de pacientes por este arquivo? O follow-up (status e anotações) é mantido.')&&loadData(e.target.files[0]);
+
+const OFERTA='Estamos com *novas fórmulas no mercado*, com *valores mais acessíveis* e *sem a necessidade de importação*, e também estamos oferecendo *descontos imperdíveis nas consultas* para todos os nossos pacientes.';
+const DEFAULT_TPL=[
+ {id:'followup',titulo:'Como está o tratamento',texto:`Olá, {nome}! Aqui é da equipe do *Dr. João Normanha*, do *Instituto de Medicina Orgânica*.\n\nEstamos entrando em contato para saber *como você está* e como anda o seu tratamento.\n\n${OFERTA}\n\nSe quiser, podemos *agendar o seu retorno por telemedicina*. É só responder esta mensagem.`},
+ {id:'retorno',titulo:'Convite para retorno',texto:`Olá, {nome}! Aqui é da equipe do *Dr. João Normanha*, do *Instituto de Medicina Orgânica*.\n\nSua última consulta foi em *{ultima}*. Para manter o tratamento *seguro e bem ajustado*, o acompanhamento regular é muito importante.\n\n${OFERTA}\n\nGostaria de *agendar um retorno*? Atendemos por *telemedicina para todo o Brasil*.`},
+ {id:'semConsulta',titulo:'Cadastrou e não consultou',texto:`Olá, {nome}! Aqui é da equipe do *Dr. João Normanha*, do *Instituto de Medicina Orgânica*.\n\nVimos que você fez o seu cadastro conosco, mas a consulta não chegou a acontecer. *Ainda podemos ajudar?*\n\n${OFERTA}\n\nSe quiser, agendamos a sua *primeira consulta por telemedicina*, no conforto da sua casa.`}
+];
+let TPL; try{TPL=JSON.parse(localStorage.getItem(MSG_KEY)||'null')}catch(e){} if(!Array.isArray(TPL)||!TPL.length) TPL=JSON.parse(JSON.stringify(DEFAULT_TPL));
+const saveTPL=()=>{try{localStorage.setItem(MSG_KEY,JSON.stringify(TPL))}catch(e){}};
+const fillTpl=(t,v)=>t.replace(/\{nome\}/g,v.nome||'').replace(/\{ultima\}/g,v.ultima||'').replace(/\{consultas\}/g,v.consultas??'');
+const escH=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+const waHtml=s=>escH(s).replace(/\*([^*\n]+)\*/g,'<b>$1</b>');
+function renderTplList(){
+  document.getElementById('tplList').innerHTML=TPL.map((t,i)=>`<div class="tpl" data-i="${i}"><div class="row2"><input class="tTit" value="${escH(t.titulo)}" placeholder="Título da mensagem"><button class="tDel" title="Excluir">Excluir</button></div><textarea class="tTxt" rows="9" style="margin-top:8px">${escH(t.texto)}</textarea><div class="hint" style="margin-top:6px">Prévia no WhatsApp (exemplo com Maria, última consulta 10/03/2026):</div><div class="prev">${waHtml(fillTpl(t.texto,{nome:'Maria',ultima:'10/03/2026',consultas:3}))}</div></div>`).join('');
+}
+document.getElementById('tplList').addEventListener('input',e=>{const box=e.target.closest('.tpl'); if(!box) return; const t=TPL[+box.dataset.i]; if(e.target.classList.contains('tTit')) t.titulo=e.target.value; if(e.target.classList.contains('tTxt')){t.texto=e.target.value; box.querySelector('.prev').innerHTML=waHtml(fillTpl(t.texto,{nome:'Maria',ultima:'10/03/2026',consultas:3}))} saveTPL()});
+document.getElementById('tplList').addEventListener('click',e=>{if(!e.target.classList.contains('tDel')) return; const i=+e.target.closest('.tpl').dataset.i; if(TPL.length<2){alert('Mantenha pelo menos uma mensagem.');return} if(confirm('Excluir a mensagem "'+TPL[i].titulo+'"?')){TPL.splice(i,1); saveTPL(); renderTplList()}});
+document.getElementById('addTpl').onclick=()=>{TPL.push({id:'m'+Date.now(),titulo:'Nova mensagem',texto:'Olá, {nome}! Aqui é da equipe do *Dr. João Normanha*.\n\n'+OFERTA}); saveTPL(); renderTplList()};
+document.getElementById('resetTpl').onclick=()=>{if(confirm('Voltar às 3 mensagens padrão? As suas edições serão perdidas.')){TPL=JSON.parse(JSON.stringify(DEFAULT_TPL)); saveTPL(); renderTplList()}};
+document.getElementById('btnMsgs').onclick=()=>{renderTplList(); document.getElementById('ovMsgs').classList.add('open')};
+document.getElementById('closeMsgs').onclick=()=>{document.getElementById('ovMsgs').classList.remove('open'); if(window.__redetail) window.__redetail()};
+
+if(!RAW){document.querySelector('header').style.display='none'; document.querySelector('main').style.display='none'; document.getElementById('loader').style.display='block';}
+else {
+const KEY='crm_imo_followup_v1';
+let FU={}; try{FU=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+const saveFU=()=>{try{localStorage.setItem(KEY,JSON.stringify(FU))}catch(e){alert('Não foi possível salvar no navegador. Use "Backup do follow-up".')}};
+const today=new Date();
+const parseBR=s=>{const m=/(\d{2})\/(\d{2})\/(\d{4})/.exec(s||''); return m?new Date(+m[3],+m[2]-1,+m[1]):null};
+const fmt=d=>d?d.toLocaleDateString('pt-BR'):'—';
+const modal=p=>/online/i.test(p)?'Online':/presencial|são paulo/i.test(p)?'Presencial':'';
+const digits=s=>(s||'').replace(/\D/g,'');
+const waNum=s=>{let d=digits(s); if(!d) return ''; d=d.replace(/^0+/,''); if(d.length<=11) d='55'+d; return d};
+const first=n=>{const f=(n||'').trim().split(/\s+/)[0]||''; return f.charAt(0).toUpperCase()+f.slice(1).toLowerCase()};
+const norm=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+
+// build patients
+const byCod={};
+RAW.pac.forEach(p=>{const nasc=parseBR(p.nasc); let idade=null; if(nasc){idade=today.getFullYear()-nasc.getFullYear(); const m=today.getMonth()-nasc.getMonth(); if(m<0||(m===0&&today.getDate()<nasc.getDate())) idade--;}
+  byCod[p.cod]={...p, nome:(p.nome||p.social||'').trim(), idade, at:[], procs:new Set(), modais:new Set(), obitoB:/sim/i.test(p.obito||''), inativoB:/sim/i.test(p.inativo||'')};});
+RAW.ag.forEach(a=>{if(a.st==='Bloqueado') return; let p=byCod[a.cod]; if(!p){p=byCod[a.cod]={cod:a.cod,nome:a.pac,at:[],procs:new Set(),modais:new Set(),idade:null,cidade:'',cel:'',tel:'',email:''}}
+  const d=a.sort?new Date(a.sort):parseBR(a.data); p.at.push({d,data:a.data,proc:a.proc,st:a.st,conv:a.conv}); if(a.proc) p.procs.add(a.proc); const m=modal(a.proc); if(m&&a.st==='Finalizado') p.modais.add(m);});
+const P=Object.values(byCod).filter(p=>p.nome);
+P.forEach(p=>{p.at.sort((a,b)=>(b.d||0)-(a.d||0)); const fin=p.at.filter(a=>a.st==='Finalizado'&&a.d&&a.d<=today); p.nFin=fin.length; p.ult=fin[0]?.d||parseBR(p.ult)||null; p.ultTs=p.ult?+p.ult:0; p.prox=p.at.find(a=>a.d&&a.d>today&&!/Cancel|Reagend/.test(a.st))?.d||null; p.meses=p.ult?(today-p.ult)/2629800000:null; p.search=norm([p.nome,p.social,p.cidade,p.email,digits(p.cel),digits(p.tel)].join(' '));});
+
+const sel=(id,vals)=>{const s=document.getElementById(id); [...vals].sort((a,b)=>a.localeCompare(b,'pt')).forEach(v=>{const o=document.createElement('option');o.value=o.textContent=v;s.appendChild(o)})};
+sel('fCidade',new Set(P.map(p=>p.cidade).filter(Boolean)));
+sel('fProc',new Set(P.flatMap(p=>[...p.procs])));
+document.getElementById('sub').textContent=`${P.length} pacientes · ${RAW.ag.length} registros de agenda · dados exportados do Amplimed em ${RAW.geradoEm}`;
+
+const QUICK=[['resgate','Resgate: 6+ meses sem consulta'],['nunca','Cadastrou e não consultou'],['semRetorno','Só 1 consulta'],['hojeProx','Contatos para hoje']];
+let quick='';
+document.getElementById('quick').innerHTML=QUICK.map(([k,t])=>`<span class="chip" data-q="${k}">${t}</span>`).join('')+'<span class="chip" data-q="obito">Mostrar falecidos/inativos</span>';
+document.getElementById('quick').onclick=e=>{const k=e.target.dataset.q; if(!k) return; quick=quick===k?'':k; [...document.querySelectorAll('#quick .chip')].forEach(c=>c.classList.toggle('on',c.dataset.q===quick)); page=0; render()};
+
+let sortK='ultTs', sortDir=-1, page=0, PER=50, cur=null, list=[];
+document.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=k==='nome'||k==='cidade'?1:-1} render()});
+['q','fCidade','fProc','fModal','fSem','fStatus'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{page=0;render()}));
+document.getElementById('prev').onclick=()=>{if(page>0){page--;render()}};
+document.getElementById('next').onclick=()=>{if((page+1)*PER<list.length){page++;render()}};
+
+const fu=p=>FU[p.cod]||{};
+const fuStatus=p=>fu(p).status||'Novo';
+const stCls=s=>({'Novo':'st-novo','Contatado':'st-contatado','Respondeu':'st-respondeu','Agendou':'st-agendou','Não quer contato':'st-nao'})[s]||'';
+
+function filtered(){
+  const q=norm(document.getElementById('q').value.trim()), qd=digits(document.getElementById('q').value);
+  const fc=document.getElementById('fCidade').value, fp=document.getElementById('fProc').value, fm=document.getElementById('fModal').value, fs=document.getElementById('fSem').value, fst=document.getElementById('fStatus').value;
+  const tstr=today.toISOString().slice(0,10);
+  return P.filter(p=>{
+    if(quick!=='obito' && (p.obitoB||p.inativoB)) return false;
+    if(quick==='obito' && !(p.obitoB||p.inativoB)) return false;
+    if(q && !(p.search.includes(q) || (qd.length>=4 && p.search.includes(qd)))) return false;
+    if(fc && p.cidade!==fc) return false;
+    if(fp && !p.procs.has(fp)) return false;
+    if(fm && !p.modais.has(fm)) return false;
+    if(fs==='nunca' && p.nFin>0) return false;
+    if(fs && fs!=='nunca' && !(p.meses!=null && p.meses>=+fs && !p.prox)) return false;
+    if(fst==='__prox'){const n=fu(p).proximo; if(!n||n>tstr) return false} else if(fst && fuStatus(p)!==fst) return false;
+    if(quick==='resgate' && !(p.meses!=null && p.meses>=6 && !p.prox && fuStatus(p)!=='Não quer contato')) return false;
+    if(quick==='nunca' && !(p.nFin===0 && !p.prox)) return false;
+    if(quick==='semRetorno' && !(p.nFin===1 && !p.prox)) return false;
+    if(quick==='hojeProx'){const n=fu(p).proximo; if(!n||n>tstr) return false}
+    return true;});
+}
+function render(){
+  list=filtered();
+  list.sort((a,b)=>{let x=sortK==='fu'?fuStatus(a):a[sortK], y=sortK==='fu'?fuStatus(b):b[sortK]; if(x==null) x=sortDir>0?'￿':-1; if(y==null) y=sortDir>0?'￿':-1; return (typeof x==='string'?x.localeCompare(y,'pt'):x-y)*sortDir});
+  const pg=list.slice(page*PER,(page+1)*PER);
+  document.getElementById('tb').innerHTML=pg.map(p=>`<tr class="row${cur===p.cod?' sel':''}" data-c="${p.cod}"><td><b>${esc(p.nome)}</b><div class="muted" style="font-size:12px">${esc(p.cel||p.tel||'')}</div></td><td>${p.idade??'—'}</td><td>${esc(p.cidade||'—')}</td><td>${fmt(p.ult)}${p.prox?`<div class="tag st-agendou">próx. ${fmt(p.prox)}</div>`:''}</td><td>${p.nFin}</td><td>${[...p.modais].map(m=>`<span class="tag">${m}</span>`).join('')}</td><td><span class="tag ${stCls(fuStatus(p))}">${fuStatus(p)}</span></td></tr>`).join('')||'<tr><td colspan="7" class="muted">Nenhum paciente com esses filtros.</td></tr>';
+  document.getElementById('pinfo').textContent=list.length?`${page*PER+1}–${Math.min((page+1)*PER,list.length)} de ${list.length}`:'0';
+  const all=P.filter(p=>!p.obitoB&&!p.inativoB);
+  const c=k=>all.filter(p=>fuStatus(p)===k).length;
+  document.getElementById('stats').innerHTML=[[list.length,'na lista atual'],[all.filter(p=>p.meses!=null&&p.meses>=6&&!p.prox).length,'6+ meses sem consulta'],[all.filter(p=>p.nFin===0&&!p.prox).length,'nunca consultaram'],[c('Contatado'),'contatados'],[c('Agendou'),'agendaram']].map(([n,t])=>`<div class="stat"><b>${n}</b>${t}</div>`).join('');
+}
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+document.getElementById('tb').onclick=e=>{const tr=e.target.closest('tr.row'); if(!tr) return; cur=tr.dataset.c; detail(byCod[cur]); render()};
+
+function detail(p){
+  const f=fu(p), n=first(p.social||p.nome), ultTxt=fmt(p.ult);
+  const want=p.nFin===0?'semConsulta':(p.meses!=null&&p.meses>=3?'retorno':'followup');
+  const msgKey=(TPL.find(t=>t.id===want)||TPL[0]).id;
+  const vars={nome:n,ultima:ultTxt,consultas:p.nFin};
+  const msg=fillTpl(TPL.find(t=>t.id===msgKey).texto,vars);
+  window.__redetail=()=>detail(p);
+  const wa=waNum(p.cel||p.tel);
+  document.getElementById('det').innerHTML=`
+  <h2>${esc(p.nome)}</h2>${p.social&&p.social!==p.nome?`<div class="muted">Nome social: ${esc(p.social)}</div>`:''}
+  ${p.obitoB?'<div class="warnbox">Paciente registrado como falecido no Amplimed. Não enviar mensagens.</div>':''}
+  <div class="grid2"><span>Idade</span><span>${p.idade??'—'} ${p.nasc?`(${esc(p.nasc)})`:''}</span><span>Cidade</span><span>${esc([p.cidade,p.uf].filter(Boolean).join(' / ')||'—')}</span><span>Celular</span><span>${esc(p.cel||'—')}</span><span>Telefone</span><span>${esc(p.tel||'—')}</span><span>E-mail</span><span>${esc(p.email||'—')}</span><span>Convênio</span><span>${esc(p.conv||'—')}</span><span>Cadastro</span><span>${esc(p.cad||'—')}</span><span>Consultas</span><span>${p.nFin} realizadas · última ${ultTxt}${p.prox?` · próxima ${fmt(p.prox)}`:''}</span><span>Modalidade</span><span>${[...p.modais].join(', ')||'não informada'}</span><span>CID / diagnóstico</span><span class="muted">não exportado do Amplimed</span></div>
+  <label class="small">Mensagem</label>
+  <select id="msgSel">${TPL.map(t=>`<option value="${esc(t.id)}">${esc(t.titulo)}</option>`).join('')}</select>
+  <textarea id="msg" rows="10">${esc(msg)}</textarea>
+  <div class="hint" style="margin-top:6px">Como o paciente vai ver no WhatsApp:</div><div class="prev" id="msgPrev"></div>
+  <div class="hint" style="margin-top:4px">Para mudar o texto de forma permanente, use o botão <b>Mensagens prontas</b> no topo.</div>
+  <div class="actions">
+    ${wa&&!p.obitoB?`<a class="btn-wa" id="aWa" target="_blank" rel="noopener" href="#">WhatsApp</a>`:'<span class="muted">Sem celular</span>'}
+    ${p.email&&!p.obitoB?`<a class="btn-mail" id="aMail" href="#">E-mail</a>`:''}
+    <button id="bCopy">Copiar mensagem</button>
+  </div>
+  <label class="small">Status do follow-up</label>
+  <select id="fuSt">${['Novo','Contatado','Respondeu','Agendou','Não quer contato'].map(s=>`<option${s===fuStatus(p)?' selected':''}>${s}</option>`).join('')}</select>
+  <label class="small">Próximo contato</label><input type="date" id="fuProx" value="${f.proximo||''}">
+  <label class="small">Anotações</label><textarea id="fuNota" rows="3">${esc(f.nota||'')}</textarea>
+  <div class="muted" style="font-size:12px;margin-top:4px">${f.log?f.log.slice(-5).map(l=>esc(l)).join('<br>'):''}</div>
+  <div class="hist"><b>Histórico de atendimentos</b>${p.at.map(a=>`<div>${esc(a.data)} · ${esc(a.proc||'—')} · <span class="muted">${esc(a.st)}</span></div>`).join('')||'<div class="muted">Sem atendimentos.</div>'}</div>`;
+  const ms=document.getElementById('msgSel'); ms.value=msgKey;
+  const ta=document.getElementById('msg');
+  ms.onchange=()=>{const t=TPL.find(x=>x.id===ms.value); if(t) ta.value=fillTpl(t.texto,vars); upd()};
+  const upd=()=>{const t=encodeURIComponent(ta.value); document.getElementById('msgPrev').innerHTML=waHtml(ta.value); const aw=document.getElementById('aWa'); if(aw) aw.href=`https://wa.me/${wa}?text=${t}`; const am=document.getElementById('aMail'); if(am) am.href=`mailto:${p.email}?subject=${encodeURIComponent('Instituto de Medicina Orgânica – acompanhamento')}&body=${encodeURIComponent(ta.value.replace(/\*([^*\n]+)\*/g,'$1'))}`};
+  ta.oninput=upd; upd();
+  const log=what=>{const r=FU[p.cod]=FU[p.cod]||{}; r.log=(r.log||[]).concat(new Date().toLocaleString('pt-BR')+' – '+what); if(!r.status||r.status==='Novo') r.status='Contatado'; saveFU(); document.getElementById('fuSt').value=r.status; render()};
+  const aw=document.getElementById('aWa'); if(aw) aw.addEventListener('click',()=>log('WhatsApp aberto'));
+  const am=document.getElementById('aMail'); if(am) am.addEventListener('click',()=>log('E-mail aberto'));
+  document.getElementById('bCopy').onclick=()=>{navigator.clipboard?.writeText(ta.value); log('Mensagem copiada')};
+  const sv=()=>{const r=FU[p.cod]=FU[p.cod]||{}; r.status=document.getElementById('fuSt').value; r.proximo=document.getElementById('fuProx').value; r.nota=document.getElementById('fuNota').value; saveFU(); render()};
+  ['fuSt','fuProx','fuNota'].forEach(id=>document.getElementById(id).addEventListener('change',sv));
+}
+document.getElementById('btnBackup').onclick=()=>{const b=new Blob([JSON.stringify({followup:FU,mensagens:TPL},null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='crm-imo-backup-'+today.toISOString().slice(0,10)+'.json'; a.click()};
+document.getElementById('fileRestore').onchange=e=>{const f=e.target.files[0]; if(!f) return; f.text().then(t=>{try{const d=JSON.parse(t); const fu=d.followup||d; FU={...FU,...fu}; saveFU(); if(Array.isArray(d.mensagens)&&d.mensagens.length){TPL=d.mensagens; saveTPL()} render(); alert('Backup restaurado.')}catch(err){alert('Arquivo inválido.')}})};
+document.getElementById('btnCsv').onclick=()=>{const rows=[['Nome','Idade','Cidade','Celular','Telefone','Email','Última consulta','Consultas','Modalidade','Status follow-up','Próximo contato','Anotações']].concat(list.map(p=>[p.nome,p.idade??'',p.cidade,p.cel,p.tel,p.email,fmt(p.ult),p.nFin,[...p.modais].join('/'),fuStatus(p),fu(p).proximo||'',fu(p).nota||''])); const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'})); a.download='crm-imo-lista.csv'; a.click()};
+render();
+}
+</script>
+</body>
+</html>
